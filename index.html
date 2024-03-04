@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Whatsapp API | Baileys</title>
+  </head>
+  <body>
+    <h2>Login sebagai: <span id="phone-number">-</span></h2>
+
+    <div>
+      <h3 id="desc">Sedang Menghubungkan dengan WhatsApp</h3>
+      <img
+        id="qrcode"
+        src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExaWRsdjl4eTNreG44aGoycDlqNWxmYXE4bGQ2MzJ4dXBtejdjNXRnYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/swhRkVYLJDrCE/giphy.gif"
+        alt="qr-code"
+      />
+    </div>
+
+    <div>
+      <ul id="logs"></ul>
+    </div>
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+      integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+      integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.1/socket.io.min.js"
+      integrity="sha512-gVG6WRMUYFaIdoocaxbqd02p3DUbhReTBWc7NTGB96i7vONrr7GuCZJHFFmkXEhpwilIWUnfRIMSlKaApwd/jg=="
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const imageSrc = {
+          loading: 'https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExaWRsdjl4eTNreG44aGoycDlqNWxmYXE4bGQ2MzJ4dXBtejdjNXRnYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/swhRkVYLJDrCE/giphy.gif',
+          success: 'https://media4.giphy.com/media/tf9jjMcO77YzV4YPwE/200w.gif'
+        }
+        const descriptionText = {
+          loading: 'Sedang Menghubungkan dengan WhatsApp',
+          success: 'WhatsApp Sudah Teruhubung',
+          qr: 'Tautkan perangkat dengan Scan QR Code menggunakan WhatsApp'
+        }
+        const socket = io();
+        const logsEl = document.querySelector("#logs");
+        const phoneNumberEl = document.querySelector("#phone-number");
+        const descEl = document.querySelector("#desc");
+        const imageEl = document.querySelector("#qrcode");
+
+        socket.on("auth", function (number) {
+          if(number) {
+            const phoneNumber = number.replace(/^62/, "0");
+            phoneNumberEl.innerText = phoneNumber;
+            imageEl.src = imageSrc.success
+            descEl.innerHTML = descriptionText.success
+          } else {
+            phoneNumberEl.innerText = '-'
+            imageEl.src = imageSrc.loading
+            descEl.innerHTML = descriptionText.loading
+          }
+        });
+        socket.on("message", function (msg) {
+          const li = document.createElement("li");
+          li.innerText = msg;
+          logsEl.append(li);
+        });
+
+        socket.on("qr", (qr) => {
+          descEl.innerHTML = descriptionText.qr
+          imageEl.src = qr;
+        });
+      });
+    </script>
+  </body>
+</html>

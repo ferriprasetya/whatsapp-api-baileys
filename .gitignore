@@ -1,0 +1,8 @@
+# credentials
+auth_info_baileys
+
+# node modules
+node_modules
+
+# package lock
+pnpm-lock.yaml
