@@ -4,6 +4,7 @@ const socketIO = require("socket.io");
 const http = require("http");
 const { Boom } = require("@hapi/boom");
 const fs = require("fs");
+const cors = require('cors');
 
 const { default: makeWASocket } = require("@whiskeysockets/baileys");
 const {
@@ -22,6 +23,10 @@ const io = new socketIO.Server(server, {
 });
 
 // index routing and middleware
+app.use(cors({
+  origin: '*',
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.get("/", (_req, res) => {
@@ -57,6 +62,7 @@ async function connectToWhatsApp() {
     // can provide additional config here
     printQRInTerminal: false,
     auth: state,
+    qrTimeout: 5000
   });
 
   sock.ev.on("creds.update", (creds) => {
@@ -70,10 +76,13 @@ async function connectToWhatsApp() {
   });
 
   sock.ev.on("connection.update", (update) => {
+    console.log('----------------Client count--------------------', io.engine.clientsCount)
+
     const { connection, lastDisconnect, qr } = update;
     io.emit("log", update);
     if (qr && !phoneNumber) {
       qrcode.toDataURL(qr, (err, url) => {
+        console.log("-------------SEND MESSAGE QR---------")
         io.emit("qr", url);
         io.emit("message", `${now} QR Code telah diterima`);
       });
@@ -84,11 +93,6 @@ async function connectToWhatsApp() {
         (lastDisconnect?.error instanceof Boom)?.output?.statusCode !==
         DisconnectReason.loggedOut
       ) {
-        // io.emit(
-        //   "message",
-        //   "Connecting.. " + lastDisconnect.error?.output?.payload?.message
-        // );
-
         switch (lastDisconnect.error?.output?.payload?.message) {
           case "QR refs attempts ended":
             sock.ws.close();
@@ -112,7 +116,7 @@ async function connectToWhatsApp() {
             }
             break;
           default:
-            // io.emit("message", "Restarting...");
+            io.emit("message", "Restarting...");
             connectToWhatsApp();
             break;
         }
@@ -133,13 +137,6 @@ async function connectToWhatsApp() {
     const messageText = m.message?.conversation ?? "";
     console.log("m.message", m.message);
     console.log("message.upsert", messageText);
-    // io.emit("message", `${now} message.upsert ${messageText}`);
-
-    if (new RegExp("ams", "i").test(messageText)) {
-      await sock.sendMessage(m.key.remoteJid, {
-        text: "Halo, ini adalah nomor WhatsApp bot AMS. Pesan kedatangan siswa akan dikirim melalui nomor ini",
-      });
-    }
   });
 }
 if (!isConnect) {

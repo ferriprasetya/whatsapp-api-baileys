@@ -1,8 +1,8 @@
 # Whatsapp API
 
-WhatsApp Chatbot with Node.js and Whatsapp.js
+WhatsApp Websocket with Node.js and baileys
 
-[REFERENCE](https://apriliantocecep.medium.com/tutorial-membuat-whatsapp-api-dengan-nodejs-tanpa-scraping-6faacd26f3b0)
+[REFERENCE](https://github.com/WhiskeySockets/Baileys)
 
 
 ## Installation
