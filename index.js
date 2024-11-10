@@ -62,7 +62,7 @@ async function connectToWhatsApp() {
     // can provide additional config here
     printQRInTerminal: false,
     auth: state,
-    qrTimeout: 5000
+    qrTimeout: 20000
   });
 
   sock.ev.on("creds.update", (creds) => {
